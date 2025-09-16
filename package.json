@@ -9,7 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@langchain/core": "^0.3.75",
+    "@langchain/google-genai": "^0.2.17",
+    "@tailwindcss/postcss": "^4.1.13",
+    "autoprefixer": "^10.4.21",
+    "axios": "^1.12.2",
+    "mongodb": "^6.19.0",
+    "mongoose": "^8.18.1",
     "next": "^15.2.3",
+    "postcss": "^8.5.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.0.15"
