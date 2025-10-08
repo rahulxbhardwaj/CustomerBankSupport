@@ -15,6 +15,7 @@ export default function LoginForm(){
   const handleSubmit = async (e) => {
     e.preventDefault();
     try{
+      
       const res = await fetch("/api/login/loginUser" , {
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -27,11 +28,7 @@ export default function LoginForm(){
         console.log("Backend Error:", data.message);
         setMessage(data.message);
       }else{
-        // Store token in localStorage as fallback for Replit iframe environment
-        if (data.token) {
-          localStorage.setItem("authToken", data.token);
-          console.log("Token stored in localStorage");
-        }
+        localStorage.setItem("token" , data.token);
         alert("Login Successful");
         setMessage(data.message);
         router.push("/dashboard");
