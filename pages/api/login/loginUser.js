@@ -28,8 +28,11 @@ export default async function handler(req , res){
     const token = jwt.sign({userId: user._id} , process.env.JWT_SECRET , {expiresIn: "1h"});
     console.log("Token at backend: "+ token);
 
+    // Set the token as an HTTP-only cookie
+    res.setHeader('Set-Cookie', `authToken=${token}; HttpOnly; Path=/; Max-Age=3600; SameSite=Strict`);
+
     console.log("password at backend :"+ password , "username at backend: "+ username , )
-    res.status(200).json({token , message: "Login Successful"})
+    res.status(200).json({message: "Login Successful"})
     
 
     

@@ -27,11 +27,8 @@ export default function LoginForm(){
         console.log("Backend Error:", data.message);
         setMessage(data.message);
       }else{
-        if (data.token) {
-          localStorage.setItem("authToken", data.token);
-          console.log("Token saved to localStorage:", data.token);
-        }
-
+        // Token is now stored in HTTP-only cookie by the server
+        console.log("Login successful - token stored in cookie");
         alert("Login Successful");
         setMessage(data.message);
         router.push("/dashboard");
