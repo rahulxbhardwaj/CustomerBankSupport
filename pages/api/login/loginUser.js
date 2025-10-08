@@ -26,6 +26,7 @@ export default async function handler(req , res){
 
     //Create a JWT token
     const token = jwt.sign({userId: user._id} , process.env.JWT_SECRET , {expiresIn: "1h"});
+    console.log("Token at backend: "+ token);
 
     console.log("password at backend :"+ password , "username at backend: "+ username , )
     res.status(200).json({token , message: "Login Successful"})

@@ -15,7 +15,6 @@ export default function LoginForm(){
   const handleSubmit = async (e) => {
     e.preventDefault();
     try{
-      
       const res = await fetch("/api/login/loginUser" , {
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -28,7 +27,11 @@ export default function LoginForm(){
         console.log("Backend Error:", data.message);
         setMessage(data.message);
       }else{
-        localStorage.setItem("token" , data.token);
+        if (data.token) {
+          localStorage.setItem("authToken", data.token);
+          console.log("Token saved to localStorage:", data.token);
+        }
+
         alert("Login Successful");
         setMessage(data.message);
         router.push("/dashboard");
