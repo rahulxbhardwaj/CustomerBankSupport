@@ -27,8 +27,11 @@ export default function LoginForm(){
         console.log("Backend Error:", data.message);
         setMessage(data.message);
       }else{
-        // Token is now stored in HTTP-only cookie by the server
-        console.log("Login successful - token stored in cookie");
+        // Store token in localStorage as fallback for Replit iframe environment
+        if (data.token) {
+          localStorage.setItem("authToken", data.token);
+          console.log("Token stored in localStorage");
+        }
         alert("Login Successful");
         setMessage(data.message);
         router.push("/dashboard");
