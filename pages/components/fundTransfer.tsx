@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function FundTransfer({accountNumber}) {
+export default function FundTransfer({accountNumber, onTransferSuccess}) {
   const [receiverId, setReceiverId] = useState("");
   const [amount, setAmount] = useState("");
   const [status, setStatus] = useState("");
@@ -28,6 +28,13 @@ export default function FundTransfer({accountNumber}) {
 
       if (res.ok) {
         setStatus(`✅ ${data.message}`);
+        setReceiverId("");
+        setAmount("");
+        
+        // Refresh user data to show updated balance and transactions
+        if (onTransferSuccess) {
+          onTransferSuccess();
+        }
       } else {
         setStatus(`❌ ${data.message}`);
       }

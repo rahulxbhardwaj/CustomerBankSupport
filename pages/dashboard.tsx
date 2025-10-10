@@ -15,7 +15,7 @@ export default function Dashboard() {
       case "accounts":
         return <Accounts userData={userData}/>;
        case "fundTransfer":
-         return <FundTransfer accountNumber={userData?.accountNumber}/>;
+         return <FundTransfer accountNumber={userData?.accountNumber} onTransferSuccess={UserDataFetch}/>;
        case "aicopilot":
          return <AICopilot />;
       default:
@@ -45,6 +45,13 @@ export default function Dashboard() {
     setMounted(true); // mark that component is mounted on client
     UserDataFetch();
   }, []);
+
+  // Refresh data when switching to accounts tab
+  useEffect(() => {
+    if (activeTab === "accounts" && mounted) {
+      UserDataFetch();
+    }
+  }, [activeTab]);
 
   if (!mounted) return null; // Prevent rendering during SSR
 
