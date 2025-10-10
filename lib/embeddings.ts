@@ -1,19 +1,13 @@
 // lib/embeddings.ts
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+
 export async function getEmbedding(text: string): Promise<number[]> {
-  const res = await fetch("https://api.gemini.com/embeddings", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${process.env.GEMINI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: "gemini-embedding-001",
-      input: text,
-    }),
-  });
-
-  const data = await res.json();
-
-  // Gemini embedding API returns array under 'embedding'
-  return data.embedding;
+  const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
+  
+  const result = await model.embedContent(text);
+  const embedding = result.embedding;
+  
+  return embedding.values;
 }

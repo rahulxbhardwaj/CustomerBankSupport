@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@chroma-core/default-embed": "^0.1.8",
+    "@google/generative-ai": "^0.24.1",
     "@langchain/core": "^0.3.75",
     "@langchain/google-genai": "^0.2.17",
     "@tailwindcss/postcss": "^4.1.13",

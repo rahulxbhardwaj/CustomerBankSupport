@@ -1,5 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import client from "../../lib/chromaConnect";
+import { getEmbedding } from "../../lib/embeddings";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
@@ -11,43 +15,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     // 1️⃣ Ensure the collection exists
-    const collection =
-      (await client.getCollection({ name: "transactions" }).catch(() =>
-        client.createCollection({ name: "transactions" })
-      ));
+    const collection = await client.getCollection({ name: "transactions" }).catch(() =>
+      client.createCollection({ name: "transactions" })
+    );
 
-    // 2️⃣ Retrieve top 3 relevant transactions from Chroma
+    // 2️⃣ Generate embedding for user query
+    const queryEmbedding = await getEmbedding(query);
+
+    // 3️⃣ Retrieve top 3 relevant transactions from ChromaDB
     const results = await collection.query({
-      queryEmbeddings: [await getEmbedding(userQuery)], // pass embeddings
+      queryEmbeddings: [queryEmbedding],
       nResults: 3,
     });
 
-    const topMatches = results[0]?.matches
-      .map((m: any) => m.metadatas.text)
+    const topMatches = results.metadatas?.[0]
+      ?.map((m: any) => m.text)
       .join("\n") || "No relevant transactions found.";
 
+    // 4️⃣ Call Gemini API with retrieved context
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    
+    const prompt = `You are a helpful banking assistant. A user asked about their transactions.
 
-    // 3️⃣ Call Gemini API
-    const geminiRes = await fetch("https://api.gemini.com/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.GEMINI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gemini-001",
-        prompt: `You are a banking assistant. User asked: "${query}"\nRelevant transactions:\n${topMatches}\nAnswer the user's query based on these transactions:`,
-        max_tokens: 300,
-      }),
-    });
+User Question: "${query}"
 
-    const geminiData = await geminiRes.json();
-    const aiAnswer = geminiData.choices?.[0]?.text || "No answer from AI.";
+Relevant Transactions:
+${topMatches}
 
-    // 4️⃣ Return AI answer
+Please answer the user's question based on these transactions. Be concise and helpful.`;
+
+    const result = await model.generateContent(prompt);
+    const aiAnswer = result.response.text();
+
+    // 5️⃣ Return AI answer
     res.status(200).json({ answer: aiAnswer });
   } catch (err) {
-    console.error("Error in API connect:", err);
-    res.status(500).json({ error: "AI Copilot failed" });
+    console.error("Error in AI Copilot:", err);
+    res.status(500).json({ error: "AI Copilot failed", details: String(err) });
   }
 }

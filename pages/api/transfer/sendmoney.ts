@@ -17,8 +17,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse){
       return res.status(400).json({ message: "Missing required fields" });
   }
     // Use findOne() to retrieve the first document that matches the query
-    const sender = await User.findOne({ accountNumber: senderId });
-  const receiver = await User.findOne({ accountNumber: receiverId });
+    const sender = await User.findOne({ accountNumber: senderId }).exec();
+    const receiver = await User.findOne({ accountNumber: receiverId }).exec();
 
   if(!sender || !receiver){
     return res.status(404).json({ message: "Sender or receiver not found" });
@@ -48,13 +48,11 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse){
     // -------------------------------
 
     try {
-      const collection =
-        (await client.getCollection({ name: "transactions" }).catch(() =>
-          client.createCollection({
-            name: "transactions",
-            embeddingDimensions: 384, // matches Gemini embedding size
-          })
-        ));
+      const collection = await client.getCollection({ name: "transactions" }).catch(() =>
+        client.createCollection({
+          name: "transactions",
+        })
+      );
 
 
       const txText = `Sender: ${sender.name}, Receiver: ${receiver.name}, Amount: ${amount}, Message: ${message}`;
