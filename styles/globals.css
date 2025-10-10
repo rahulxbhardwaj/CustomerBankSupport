@@ -1,5 +1,21 @@
 @import 'tailwindcss';
 
+/* 1. Define the color-changing keyframes */
+@keyframes rainbow {
+  0% { color: #ff0000; }   /* Red */
+  16% { color: #ff7f00; }  /* Orange */
+  33% { color: #ffff00; }  /* Yellow */
+  50% { color: #00ff00; }  /* Green */
+  66% { color: #0000ff; }  /* Blue */
+  83% { color: #4b0082; }  /* Indigo/Violet */
+  100% { color: #ff0000; } /* Back to Red */
+}
+
+/* 2. Apply the animation to a class */
+.text-rainbow {
+  /* Apply the animation: 4s duration, infinite loop, linear timing */
+  animation: rainbow 4s infinite linear;
+}
 
 input{
   @apply w-[300px] border border-gray-800 py-2 px-6 bg-zinc-100/40;

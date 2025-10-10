@@ -23,11 +23,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    const accountNumber = Math.floor(1000000000 + Math.random() * 9000000000).toString()
     const newUser = new User({
       name,
       username,
       password: hashedPassword,
+      accountNumber: accountNumber,
     });
 
     await newUser.save();

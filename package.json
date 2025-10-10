@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chroma-core/default-embed": "^0.1.8",
     "@langchain/core": "^0.3.75",
     "@langchain/google-genai": "^0.2.17",
     "@tailwindcss/postcss": "^4.1.13",
@@ -16,11 +17,14 @@
     "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
+    "chromadb": "^3.0.17",
+    "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.19.0",
     "mongoose": "^8.18.1",
     "next": "^15.2.3",
     "next-auth": "^4.24.11",
+    "node-fetch": "^3.3.2",
     "postcss": "^8.5.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

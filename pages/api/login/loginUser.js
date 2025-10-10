@@ -26,9 +26,12 @@ export default async function handler(req , res){
 
     //Create a JWT token
     const token = jwt.sign({userId: user._id} , process.env.JWT_SECRET , {expiresIn: "1h"});
-
-    console.log("password at backend :"+ password , "username at backend: "+ username , )
-    res.status(200).json({token , message: "Login Successful"})
+    
+    //Set the token as an HTTP-only cookie
+    res.setHeader("Set-Cookie", `token=${token}; Path=/; HttpOnly; Secure; Max-Age=86400; SameSite=Strict`);
+    
+    
+    res.status(200).json({message: "Login Successful"})
     
 
     

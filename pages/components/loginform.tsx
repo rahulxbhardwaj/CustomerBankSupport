@@ -2,11 +2,16 @@
 import Link from "next/link"
 import {use, useState} from "react"
 import { useRouter } from "next/router"
+import { useEffect } from "react"
+
+
 
 export default function LoginForm(){
   const router = useRouter();
   const [formdata , setFormData] = useState({username: "" , password: ""});
   const [message , setMessage] = useState("");
+
+ 
 
   const handleChange = (e) => {
     setFormData({...formdata , [e.target.name]: e.target.value});
@@ -20,6 +25,7 @@ export default function LoginForm(){
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(formdata),
+        credentials: "include",
       });
 
       const data = await res.json()
@@ -28,9 +34,6 @@ export default function LoginForm(){
         console.log("Backend Error:", data.message);
         setMessage(data.message);
       }else{
-        localStorage.setItem("token" , data.token);
-        alert("Login Successful");
-        setMessage(data.message);
         router.push("/dashboard");
       }
      

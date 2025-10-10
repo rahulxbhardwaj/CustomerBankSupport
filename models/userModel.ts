@@ -17,7 +17,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
+  },
+  balance: {
+    type: Number,
+    default: 0,
+  },
+  accountNumber: {
+    type: String,
+    unique: true,
+    required: true,
   }
+  
 },{ timestamps: true })
 
 const User = mongoose.models.User || mongoose.model("User", userSchema)
