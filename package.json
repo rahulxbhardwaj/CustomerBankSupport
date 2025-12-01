@@ -9,10 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@chroma-core/default-embed": "^0.1.8",
     "@google/generative-ai": "^0.24.1",
-    "@langchain/core": "^0.3.75",
-    "@langchain/google-genai": "^0.2.17",
     "@react-pdf/renderer": "^4.3.1",
     "@tailwindcss/postcss": "^4.1.13",
     "autoprefixer": "^10.4.21",
@@ -23,7 +20,6 @@
     "framer-motion": "^12.23.24",
     "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
-    "lucide-react": "^0.545.0",
     "mongodb": "^6.19.0",
     "mongoose": "^8.18.1",
     "next": "^15.2.3",
