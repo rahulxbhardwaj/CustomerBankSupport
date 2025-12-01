@@ -1,16 +1,19 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function AICopilot() {
   const [query, setQuery] = useState("");
-  const [answer, setAnswer] = useState("");
+  const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const containerRef = useRef(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!query) return;
 
+    const userMessage = { type: "user", text: query };
+    setMessages((prev) => [...prev, userMessage]);
+    setQuery("");
     setLoading(true);
-    setAnswer("");
 
     try {
       const res = await fetch("/api/aicopilot", {
@@ -19,41 +22,122 @@ export default function AICopilot() {
         body: JSON.stringify({ query }),
       });
       const data = await res.json();
-      setAnswer(data.answer);
+      const aiMessage = { type: "ai", text: data.answer };
+      setMessages((prev) => [...prev, aiMessage]);
     } catch (err) {
       console.error(err);
-      setAnswer("Error fetching AI response");
+      const errorMessage = { type: "ai", text: "Error fetching AI response" };
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="max-w-xl mx-auto p-4 border rounded-lg shadow-md bg-white">
-      <h2 className="text-xl font-semibold mb-3">AI Copilot</h2>
+  // Auto scroll to bottom
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [messages]);
 
-      <form onSubmit={handleSubmit} className="mb-4">
+  return (
+    <div className="max-w-3xl mx-auto h-[80vh] p-6 bg-gray-50 rounded-xl shadow-xl flex flex-col">
+      <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
+        AI Copilot
+      </h2>
+
+      <div
+        ref={containerRef}
+        className="flex-1 overflow-y-auto p-4 bg-white rounded-lg shadow-inner mb-4 space-y-4"
+      >
+        {messages.map((msg, idx) => (
+          <div
+            key={idx}
+            className={`max-w-[80%] p-3 rounded-lg ${
+              msg.type === "user"
+                ? "bg-blue-600 text-white self-end"
+                : "bg-gray-200 text-gray-800 self-start"
+            }`}
+          >
+            {msg.text}
+          </div>
+        ))}
+
+        {loading && (
+          <div className="bg-gray-200 text-gray-800 self-start p-3 rounded-lg flex items-center gap-2 animate-fadeIn">
+            <div className="dot-flashing"></div>
+            AI is typing...
+          </div>
+        )}
+      </div>
+
+      <form onSubmit={handleSubmit} className="flex gap-3">
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ask about your transactions..."
-          className="w-full p-2 border rounded mb-2"
+          placeholder="Type your query..."
+          className="flex-1 p-4 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           disabled={loading}
+          className={`px-6 py-4 rounded-lg text-white font-semibold transition ${
+            loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
-          {loading ? "Thinking..." : "Ask"}
+          Ask
         </button>
       </form>
 
-      {answer && (
-        <div className="bg-gray-100 p-3 rounded text-gray-800">
-          {answer}
-        </div>
-      )}
+      {/* Animations */}
+      <style jsx>{`
+        .dot-flashing {
+          position: relative;
+          width: 1rem;
+          height: 1rem;
+          border-radius: 50%;
+          background-color: #4f46e5;
+          color: #4f46e5;
+          animation: dotFlashing 1s infinite linear alternate;
+        }
+        .dot-flashing::before,
+        .dot-flashing::after {
+          content: '';
+          display: inline-block;
+          position: absolute;
+          top: 0;
+        }
+        .dot-flashing::before {
+          left: -1.5rem;
+          width: 1rem;
+          height: 1rem;
+          border-radius: 50%;
+          background-color: #4f46e5;
+          animation: dotFlashing 1s infinite linear alternate;
+          animation-delay: 0.33s;
+        }
+        .dot-flashing::after {
+          left: 1.5rem;
+          width: 1rem;
+          height: 1rem;
+          border-radius: 50%;
+          background-color: #4f46e5;
+          animation: dotFlashing 1s infinite linear alternate;
+          animation-delay: 0.66s;
+        }
+        @keyframes dotFlashing {
+          0% { opacity: 0.2; }
+          50%, 100% { opacity: 1; }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(5px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 }

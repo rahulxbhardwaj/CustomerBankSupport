@@ -1,29 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import DashboardNavBar from "./components/dashboardNavBar";
 import Accounts from "./components/accounts"
 import FundTransfer from "./components/fundTransfer"
 import AICopilot from "./components/aicopilot";
+import Services from "./components/services"
 
 export default function Dashboard() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false); // NEW
-  const [activeTab, setActiveTab] = useState("accounts"); // default tab
+  const [mounted, setMounted] = useState(false);
+  const [activeTab, setActiveTab] = useState("accounts");
 
-  const renderTab = () => {
-    switch (activeTab) {
-      case "accounts":
-        return <Accounts userData={userData}/>;
-       case "fundTransfer":
-         return <FundTransfer accountNumber={userData?.accountNumber} onTransferSuccess={UserDataFetch}/>;
-       case "aicopilot":
-         return <AICopilot />;
-      default:
-        return <Accounts userData={userData} />;
-    }
-  };
-  
-  const UserDataFetch = async () => {
+  const UserDataFetch = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/fetchUserData", {
@@ -39,19 +27,33 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const renderTab = () => {
+    switch (activeTab) {
+      case "accounts":
+        return <Accounts userData={userData}/>;
+      case "fundTransfer":
+        return <FundTransfer accountNumber={userData?.accountNumber} onTransferSuccess={UserDataFetch}/>;
+      case "services":
+        return <Services />;
+      case "aicopilot":
+        return <AICopilot />;
+      default:
+        return <Accounts userData={userData} />;
+    }
   };
 
   useEffect(() => {
-    setMounted(true); // mark that component is mounted on client
+    setMounted(true);
     UserDataFetch();
-  }, []);
+  }, [UserDataFetch]);
 
-  // Refresh data when switching to accounts tab
   useEffect(() => {
     if (activeTab === "accounts" && mounted) {
       UserDataFetch();
     }
-  }, [activeTab]);
+  }, [activeTab, mounted, UserDataFetch]);
 
   if (!mounted) return null; // Prevent rendering during SSR
 

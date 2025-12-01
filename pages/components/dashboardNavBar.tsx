@@ -67,6 +67,12 @@ export default function DashboardNavBar({ setActiveTab }) {
           Fund Transfer
         </button>
 
+        <button 
+          onClick={() => setActiveTab("services")}
+          className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">
+          Banking Services
+        </button>
+
         <button
             onClick={() => setActiveTab("aicopilot")}
             className="text-rainbow font-2xl transition-colors">

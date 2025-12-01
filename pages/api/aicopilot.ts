@@ -28,27 +28,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       nResults: 3,
     });
 
-    const topMatches = results.metadatas?.[0]
-      ?.map((m: any) => m.text)
-      .join("\n") || "No relevant transactions found.";
+    // 4️⃣ Ignore AI result completely
+    // and directly return the static message
+    return res.status(200).json({ answer: "wait let me see" });
 
-    // 4️⃣ Call Gemini API with retrieved context
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
-    
-    const prompt = `You are a helpful banking assistant. A user asked about their transactions.
-
-User Question: "${query}"
-
-Relevant Transactions:
-${topMatches}
-
-Please answer the user's question based on these transactions. Be concise and helpful.`;
-
-    const result = await model.generateContent(prompt);
-    const aiAnswer = result.response.text();
-
-    // 5️⃣ Return AI answer
-    res.status(200).json({ answer: aiAnswer });
   } catch (err) {
     console.error("Error in AI Copilot:", err);
     res.status(500).json({ error: "AI Copilot failed", details: String(err) });

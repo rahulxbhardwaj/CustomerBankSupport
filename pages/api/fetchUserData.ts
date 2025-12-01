@@ -1,10 +1,30 @@
 import dbConnect from "../../lib/dbConnect"
 import User from "../../models/userModel"
-import {jwtVerify} from "jose";
 import jwt from "jsonwebtoken";
-import transcation from "../../models/transcation"
+import Transaction from "../../models/transcation"
+import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function handler(req , res){
+interface DecodedToken {
+  userId: string;
+  username?: string;
+  iat?: number;
+  exp?: number;
+}
+
+interface PopulatedUser {
+  name: string;
+  accountNumber: string;
+}
+
+interface PopulatedTransaction {
+  _id: string;
+  amount: number;
+  date: Date;
+  sender: PopulatedUser;
+  receiver: PopulatedUser;
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if(req.method === "GET"){
     try{
       await dbConnect();
@@ -12,34 +32,33 @@ export default async function handler(req , res){
       
       if(!token){ return res.status(401).json({message: "Token not found"})};
 
-      // Decode JWT (no need to verify middleware already did)
-      const decoded = jwt.decode(token); // contains username, id, etc.
-      if (!decoded) {
+      const decoded = jwt.decode(token) as DecodedToken | null;
+      if (!decoded || !decoded.userId) {
         return res.status(401).json({ message: "Invalid token" });
       }
   
-     
-      // Optionally, fetch more user info from DB
-      const user = await User.findById(decoded.userId).select("-password"); // exclude password
+      const user = await User.findById(decoded.userId).select("-password");
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
-      // Fetch latest 5 transactions sent by the user
-      const recentTransactions = await transcation
+      const recentTransactions = await Transaction
         .find({
           $or: [
             { sender: user._id },
             { receiver: user._id }
           ]
         })
-        .sort({ createdAt: -1 }) // latest first
-        .limit(5).populate("sender", "name accountNumber")
-        .populate("receiver", "name accountNumber");
-
-    
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate("sender", "name accountNumber")
+        .populate("receiver", "name accountNumber")
+        .lean() as unknown as PopulatedTransaction[];
      
       return res.status(200).json({
         name: user.name,
         accountNumber: user.accountNumber,
-        
         balance: user.balance,
         recentTransactions: recentTransactions.map(tx => ({
           _id: tx._id,
@@ -55,7 +74,6 @@ export default async function handler(req , res){
           },
         })),
       });
-
       
     }catch(error){
       console.error("Error fetching user data:", error);

@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
-import {jwtVerify} from "jose";
+import { jwtVerify } from "jose";
 
 export async function middleware(req) {
- const pathname = req.nextUrl.pathname;
- const token = req.cookies.get("token")?.value
- const url = req.nextUrl.clone();
+  const pathname = req.nextUrl.pathname;
+  const token = req.cookies.get("token")?.value;
+  const url = req.nextUrl.clone();
 
-  if(pathname === "/dashboard"){
+  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
     if (!token) {
       url.pathname = "/";
       return NextResponse.redirect(url);
     }
 
     try {
-      // Secret must be a Uint8Array
       const secret = new TextEncoder().encode(process.env.JWT_SECRET);
       await jwtVerify(token, secret);
       return NextResponse.next();
@@ -22,28 +21,27 @@ export async function middleware(req) {
       url.pathname = "/";
       return NextResponse.redirect(url);
     }
-  }
-  else if(pathname === "/api/fetchUserData"){
-    
-    if (!token){
-      return res.status(401).json({message: "Unauthorized"});
+  } else if (pathname === "/api/fetchUserData" || pathname === "/api/transfer/sendmoney") {
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-    try{
+    try {
       const secret = new TextEncoder().encode(process.env.JWT_SECRET);
       await jwtVerify(token, secret);
       return NextResponse.next();
-    }catch(err){
+    } catch (err) {
       console.error("JWT Verification Error:", err);
-      return res.status(401).json({message: "Error in fetching user data"});
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-    
-  }
-   
   }
 
+  return NextResponse.next();
+}
+
 export const config = {
-  matcher: ["/dashboard/:path*" ,
-           "/api/fetchUserData",
-            "/api/transfer/sendmoney",
-           ],
+  matcher: [
+    "/dashboard/:path*",
+    "/api/fetchUserData",
+    "/api/transfer/sendmoney",
+  ],
 };

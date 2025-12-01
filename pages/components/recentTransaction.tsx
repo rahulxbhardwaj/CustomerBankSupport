@@ -1,4 +1,22 @@
-export default function RecentTransactions({ transactions = [], accountNumber }) {
+interface UserInfo {
+  name: string;
+  accountNumber: string;
+}
+
+interface Transaction {
+  _id: string;
+  date: string;
+  amount: number;
+  sender: UserInfo;
+  receiver: UserInfo;
+}
+
+interface RecentTransactionsProps {
+  transactions?: Transaction[];
+  accountNumber: string;
+}
+
+export default function RecentTransactions({ transactions = [], accountNumber }: RecentTransactionsProps) {
   if (!transactions || transactions.length === 0) {
     return (
       <div className="bg-white shadow-md rounded-lg p-6 text-gray-500">
@@ -7,26 +25,23 @@ export default function RecentTransactions({ transactions = [], accountNumber })
     );
   }
 
-  // Reverse transactions so latest appear first
   const reversedTransactions = [...transactions].sort(
-    (a, b) => new Date(b.date) - new Date(a.date)
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
-      
-      <div class="bg-blue-500 p-5 rounded-t-md shadow-lg w-full">
-          <h2 class="text-2xl font-semibold text-white">Recent Transactions</h2>
+      <div className="bg-blue-500 p-5 rounded-t-md shadow-lg w-full">
+        <h2 className="text-2xl font-semibold text-white">Recent Transactions</h2>
       </div>
-      <br></br>
+      <br />
       <ul className="divide-y divide-gray-200">
         {reversedTransactions.map((tx) => {
           const isDebit = tx.sender.accountNumber === accountNumber;
           const color = isDebit ? "text-red-600" : "text-green-600";
           const sign = isDebit ? "-" : "+";
 
-          // Mask last 4 digits of account number
-          const formatUser = (user) => {
+          const formatUser = (user: UserInfo) => {
             const last4 = user.accountNumber.slice(-4);
             return `${user.name} ****${last4}`;
           };

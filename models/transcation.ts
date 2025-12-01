@@ -1,6 +1,15 @@
-import mongoose from "mongoose"
+import mongoose, { Document, Model, Types } from "mongoose";
 
-const TransactionSchema = new mongoose.Schema({
+export interface ITransaction extends Document {
+  sender: Types.ObjectId;
+  receiver: Types.ObjectId;
+  amount: number;
+  date: Date;
+  balance: number;
+  message?: string;
+}
+
+const TransactionSchema = new mongoose.Schema<ITransaction>({
   sender: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -19,11 +28,15 @@ const TransactionSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  message : {
+  balance: {
+    type: Number,
+    required: true,
+  },
+  message: {
     type: String,
   }
-})
+});
 
-const Transaction = mongoose.models.Transaction || mongoose.model("Transaction", TransactionSchema)
+const Transaction: Model<ITransaction> = mongoose.models.Transaction || mongoose.model<ITransaction>("Transaction", TransactionSchema);
 
 export default Transaction;

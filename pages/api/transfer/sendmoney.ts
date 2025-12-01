@@ -39,6 +39,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse){
       receiver: receiver._id,
       amount,
       message,
+      balance: sender.balance,
+    
     });
 
     await transaction.save();
@@ -55,7 +57,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse){
       );
 
 
-      const txText = `Sender: ${sender.name}, Receiver: ${receiver.name}, Amount: ${amount}, Message: ${message}`;
+      const txText = `Sender: ${sender.name}, Receiver: ${receiver.name}, Amount: ${amount} in INR, Message: ${message}`;
 
       // 1️⃣ Generate embedding from Gemini
       const embedding = await getEmbedding(txText);
